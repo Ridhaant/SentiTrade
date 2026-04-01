@@ -1,297 +1,90 @@
 <div align="center">
 
-```
-███████╗███████╗███╗   ██╗████████╗██╗████████╗██████╗  █████╗ ██████╗ ███████╗
-██╔════╝██╔════╝████╗  ██║╚══██╔══╝██║╚══██╔══╝██╔══██╗██╔══██╗██╔══██╗██╔════╝
-███████╗█████╗  ██╔██╗ ██║   ██║   ██║   ██║   ██████╔╝███████║██║  ██║█████╗
-╚════██║██╔══╝  ██║╚██╗██║   ██║   ██║   ██║   ██╔══██╗██╔══██║██║  ██║██╔══╝
-███████║███████╗██║ ╚████║   ██║   ██║   ██║   ██║  ██║██║  ██║██████╔╝███████╗
-╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝
-```
-
-# sentitrade
-
-**Real-Time Indian Financial News Sentiment Pipeline**
-
-[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![NLP](https://img.shields.io/badge/VADER_NLP-Domain_Adapted-orange?style=for-the-badge)](https://github.com/cjhutto/vaderSentiment)
-[![ZeroMQ](https://img.shields.io/badge/ZeroMQ-PUSH%2FPULL-DF0000?style=for-the-badge&logo=zeromq&logoColor=white)](https://zeromq.org)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](./LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-pytest-blue?style=for-the-badge)](./tests/)
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=24&duration=2500&pause=800&color=00FF41&center=true&vCenter=true&width=800&lines=SentiTrade;Real-Time+Indian+Market+Sentiment+%7C+Production+NLP;VADER+%2B+130+Domain+Boosters+%7C+11-Sector+Classifier;SHA-256+Dedup+%7C+ZMQ+Signal+Bus+%7C+GenAI-Ready" alt="sentitrade" />
 
 <br/>
 
-> Polls NSE/BSE financial news RSS feeds · Runs domain-adapted VADER NLP
-> with 130+ Indian market keywords · Classifies into 11 NSE sectors
-> · Publishes structured `SentimentSignal` dicts over ZMQ PUSH
+![NLP](https://img.shields.io/badge/NLP-VADER%20%2B%20Boosters-00FF41?style=for-the-badge)
+![Sectors](https://img.shields.io/badge/Sectors-11%20Classified-00D4FF?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
 <br/>
 
-[⚡ Quickstart](#quickstart) · [🧠 Sentiment Model](#sentiment-model) · [🏗 Pipeline](#pipeline) · [📐 API Reference](#api-reference) · [🔗 Project Context](#project-context)
+<img src="https://skillicons.dev/icons?i=python,linux,docker,git&theme=dark" />
+
+<br/><br/>
+
+![VADER](https://img.shields.io/badge/VADER_NLP-3fb950?style=flat-square)
+![ZeroMQ](https://img.shields.io/badge/ZeroMQ_PUSH-DF0000?style=flat-square&logo=zeromq&logoColor=white)
+![SHA-256](https://img.shields.io/badge/SHA--256_Dedup-000000?style=flat-square)
+![feedparser](https://img.shields.io/badge/feedparser_RSS-FF6B35?style=flat-square)
+![Anthropic](https://img.shields.io/badge/Claude_Optional-191919?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI](https://img.shields.io/badge/GPT--4o_Optional-412991?style=flat-square&logo=openai&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini_Optional-4285F4?style=flat-square&logo=google&logoColor=white)
+
+*Sole-authored by **[Ridhaant Ajoy Thackur](https://github.com/Ridhaant)** · Extracted from [AlgoStack](https://github.com/Ridhaant/AlgoStack)*
 
 </div>
 
 ---
 
-## Why sentitrade?
+## ⚡ What Is SentiTrade?
 
-Generic NLP models don't understand Indian financial markets:
-
-| Problem | Standard VADER | sentitrade |
-|---------|---------------|------------|
-| "FII buying" | Neutral (unknown phrase) | **BULLISH** (+boost) |
-| "NPA rise" | Neutral (unknown acronym) | **BEARISH** (+boost) |
-| "RBI rate hike" | Neutral or weakly negative | **BEARISH HIGH** (×1.2 amplifier) |
-| Duplicate RSS articles | Reprocesses everything | **SHA-256 dedup** (O(1) skip) |
-| Multiple consumers | Broadcast to all | **PUSH/PULL** (work queue) |
-
-`sentitrade` adapts VADER for Indian markets with 130+ NSE/BSE-specific keyword boosters, a high-impact amplifier for market-moving events, and an 11-sector classifier — all running in < 1ms per article.
+A production-tested NLP sentiment pipeline purpose-built for **Indian financial markets** — ingests 4 simultaneous RSS feeds, applies domain-adapted VADER with **130+ NSE/BSE keyword boosters**, classifies across **11 sectors**, and distributes structured signals over ZMQ PUSH/PULL. Optional GenAI enrichment via Anthropic Claude / OpenAI / Gemini (env-only keys — never hardcoded).
 
 ---
 
-## Pipeline
+## 🏗️ Pipeline Architecture
 
+```mermaid
+graph LR
+    subgraph "📡 Ingestion"
+        RSS["4 Indian Market RSS Feeds<br/>MoneyControl · ET Markets<br/>LiveMint · Business Standard"]
+    end
+    subgraph "🧠 NLP Pipeline"
+        DEDUP["SHA-256 URL Dedup<br/>O(1) · 10K FIFO"]
+        VADER["VADER Compound Score"]
+        BOOST["130+ Keyword Boosters<br/>±5% per hit · ±0.5 cap<br/>×1.2 high-impact amplifier"]
+        SECTOR["11-Sector Classifier<br/>Banking · IT · Pharma · Auto<br/>Energy · Metals · FMCG · Realty<br/>Indices · Crypto · Telecom"]
+    end
+    subgraph "📊 Output"
+        SIGNAL["SentimentSignal<br/>score · label · confidence<br/>sectors · triggers"]
+        ZMQ["ZMQ PUSH/PULL<br/>Exactly-once delivery"]
+    end
+    RSS --> DEDUP --> VADER --> BOOST --> SECTOR --> SIGNAL --> ZMQ
+
+    style DEDUP fill:#0d1117,stroke:#FF6B35,stroke-width:2px,color:#FF6B35
+    style BOOST fill:#0d1117,stroke:#00FF41,stroke-width:2px,color:#00FF41
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                       SentiPipeline                              │
-│                                                                  │
-│  RSS Feeds (feedparser)                                          │
-│  ┌─────────────────┐  ┌──────────────────┐  ┌────────────────┐   │
-│  │ Economic Times  │  │  Moneycontrol    │  │ Business Std.  │   │
-│  │    Markets      │  │                  │  │                │   │
-│  └────────┬────────┘  └────────┬─────────┘  └───────┬────────┘   │
-│           └────────────────────┴─────────────────────┘           │
-│                                │                                 │
-│                   ┌────────────▼─────────────┐                   │
-│                   │   _DedupeCache            │                  │
-│                   │  SHA-256 URL hash         │                  │
-│                   │  O(1) lookup, 10K FIFO   │                   │
-│                   └────────────┬─────────────┘                   │
-│                                │  new articles only              │
-│                   ┌────────────▼─────────────┐                   │
-│                   │   analyse_text()          │                  │
-│                   │                          │                   │
-│                   │  ① VADER compound score  │                   │
-│                   │  ② +keyword boost (130+) │                   │
-│                   │  ③ ×1.2 high-impact amp  │                   │
-│                   │  ④ 11-sector classifier  │                   │
-│                   └────────────┬─────────────┘                   │
-│                                │                                 │
-│           ┌────────────────────┴─────────────────┐               │
-│           │                                      │               │
-│  ┌────────▼────────┐                  ┌──────────▼─────────┐     │
-│  │ ZMQ PUSH :28090 │                  │  on_signal(fn)     │     │
-│  │  work-queue     │                  │  callback API      │     │
-│  └─────────────────┘                  └────────────────────┘     │
-└──────────────────────────────────────────────────────────────────┘
-```
+
+### Why SHA-256 Dedup?
+
+Fixed 16-char hex keys prevent URL-based injection attacks. O(1) lookup with predictable memory (bounded 10K FIFO). Avoids regex-based URL parsing vulnerabilities.
+
+### Why Domain-Adaptive Boosters?
+
+Standard VADER is calibrated for social media — Indian financial news uses domain-specific terminology ("FII buying", "NPA", "Nifty breakout"). 130+ keyword boosters bridge this gap with measurable impact: ±5% compound shift per keyword hit, capped at ±0.5 to prevent keyword stuffing.
 
 ---
 
-## Sentiment Model
+## 🔗 Proven in Production
 
-### Three-layer scoring
-
-```
-Final score = clip( (vader_score + keyword_boost) × amplifier, −1, +1 )
-```
-
-| Layer | Details |
-|-------|---------|
-| **VADER base** | Compound score in `[−1, +1]` — trained on social media English |
-| **Keyword boost** | ±5% per hit, capped at ±0.5 — 130+ NSE/BSE bull/bear terms |
-| **High-impact amplifier** | ×1.2 if headline contains `breaking / surge / crash / rally / …` |
-
-### Bullish keywords (sample)
-`FII buying` · `RBI rate cut` · `strong earnings` · `GDP growth` · `bull run` · `record high` · `buyback` · `dividend declared` · `order win` · `capacity expansion`
-
-### Bearish keywords (sample)
-`NPA rise` · `RBI rate hike` · `FII selling` · `profit warning` · `earnings miss` · `credit downgrade` · `regulatory action` · `market crash` · `inflation surge` · `forex outflow`
-
-### Sector classification (11 NSE sectors)
-
-`Banking` · `IT` · `Pharma` · `Auto` · `Energy` · `Metals` · `FMCG` · `Realty` · `Indices` · `Crypto` · `Telecom`
-
-One article can tag multiple sectors (multi-label).
-
-### Why not BERT?
-
-Fine-tuning BERT requires 10K+ labelled examples and a GPU inference server. VADER + keyword boosters reaches **~80% F1 on NSE news with zero labelled data** and runs in **< 1ms per article** — the correct tradeoff for a side-channel trading signal.
+Extracted from [AlgoStack](https://github.com/Ridhaant/AlgoStack)'s live NLP layer — processing real Indian market news in real-time across 16 concurrent processes.
 
 ---
 
-## Quickstart
+## 📦 Related
 
-### Install
-
-```bash
-pip install feedparser vaderSentiment pyzmq pytz
-# or
-pip install -r requirements.txt
-```
-
-### As a library
-
-```python
-from src.sentitrade import SentiPipeline, FeedConfig
-
-def on_signal(s):
-    print(f"[{s.label}] {s.score:+.3f} | {s.headline[:70]}")
-    print(f"  sectors={s.sectors}  impact={s.impact}")
-
-pipeline = SentiPipeline(
-    feeds=[
-        FeedConfig("ET Markets",     "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms"),
-        FeedConfig("Moneycontrol",   "https://www.moneycontrol.com/rss/marketsindia.xml"),
-        FeedConfig("Business Std",   "https://www.business-standard.com/rss/markets-106.rss"),
-        FeedConfig("Livemint",       "https://www.livemint.com/rss/markets"),
-    ],
-    poll_interval=60,
-)
-pipeline.on_signal(on_signal)
-pipeline.start()
-
-import time; time.sleep(300)
-
-# Aggregate sentiment over last 20 articles
-agg = pipeline.aggregate(window=20)
-print(agg)
-# {'score': 0.124, 'label': 'BULLISH', 'n': 20, 'top_sectors': ['Banking', 'IT']}
-```
-
-### As a standalone process
-
-```bash
-python src/sentitrade.py --interval 60 --port 28090
-python src/sentitrade.py --feeds feeds.json --port 28090
-```
-
-### Subscribe from another process
-
-```python
-import zmq, json
-
-ctx = zmq.Context()
-sock = ctx.socket(zmq.PULL)
-sock.connect("tcp://127.0.0.1:28090")
-
-while True:
-    signal = json.loads(sock.recv_string())
-    print(signal["label"], signal["score"], signal["sectors"])
-```
+[![AlgoStack](https://img.shields.io/badge/AlgoStack-Parent%20Platform-00D4FF?style=for-the-badge)](https://github.com/Ridhaant/AlgoStack)
+[![nexus-price-bus](https://img.shields.io/badge/nexus--price--bus-Price%20Bus-DF0000?style=for-the-badge)](https://github.com/Ridhaant/Nexus-Price-Bus)
+[![vectorsweep](https://img.shields.io/badge/vectorsweep-GPU%20Sweeps-76B900?style=for-the-badge)](https://github.com/Ridhaant/VectorSweep)
+[![SentinelVault](https://img.shields.io/badge/SentinelVault-Security-FF6B35?style=for-the-badge)](https://github.com/Ridhaant/SentinelVault)
 
 ---
 
-## API Reference
+<div align="center">
 
-### `SentimentSignal` schema
+© 2026 Ridhaant Ajoy Thackur · MIT License
 
-```json
-{
-  "score":            -0.412,
-  "label":            "BEARISH",
-  "confidence":        0.412,
-  "sectors":          ["Banking", "Indices"],
-  "impact":           "HIGH",
-  "headline":         "RBI holds repo rate; warns of sticky inflation",
-  "source":           "Economic Times Markets",
-  "url":              "https://...",
-  "ts":               "2026-03-30T10:32:14+05:30",
-  "article_id":       "a3f2c91d",
-  "bullish_triggers": [],
-  "bearish_triggers": ["rate hold", "inflation warning"]
-}
-```
-
-### `pipeline.aggregate(window=20)` response
-
-```json
-{
-  "score":       0.085,
-  "label":       "NEUTRAL",
-  "n":           20,
-  "top_sectors": ["IT", "Banking", "Pharma"]
-}
-```
-
-Recency weighting: last 20% of window receives 30% of weight; older 80% receives 70%.
-
-### `FeedConfig`
-
-```python
-FeedConfig(
-    name: str,
-    url: str,
-    weight: float = 1.0,       # signal weight for aggregate()
-    max_articles: int = 25,    # max articles per poll
-)
-```
-
----
-
-## Custom Feeds
-
-Create `feeds.json`:
-
-```json
-[
-  {"name": "NSE India",    "url": "https://www.nseindia.com/feed.xml",         "weight": 1.5},
-  {"name": "Zerodha Pulse","url": "https://zerodha.com/pulse/feed/",           "weight": 1.0},
-  {"name": "SEBI Releases","url": "https://www.sebi.gov.in/sebiweb/other/OtherAction.do?doNews=yes","weight": 2.0}
-]
-```
-
-```bash
-python src/sentitrade.py --feeds feeds.json
-```
-
----
-
-## Performance
-
-| Metric | Value |
-|--------|-------|
-| Analysis latency per article | **< 1ms** (VADER + keyword scan) |
-| Indian market keywords | **130+** bullish + bearish |
-| NSE sector classifiers | **11** |
-| Dedup cache lookup | **O(1)** — SHA-256, bounded 10K FIFO |
-| Simultaneous feeds | **4** (configurable) |
-| ZMQ topology | **PUSH/PULL** — each signal processed by exactly one consumer |
-
-**ZMQ PUSH/PULL vs PUB/SUB:** PUSH/PULL distributes signals round-robin — each message goes to exactly one consumer. Use this when consumers are processing work (avoid duplicate analysis). Use PUB/SUB (nexus-price-bus pattern) when every subscriber needs every message.
-
----
-
-## Running Tests
-
-```bash
-pytest tests/ -v
-```
-
----
-
-## Project Context
-
-`sentitrade` is the extracted NLP layer from [`AlgoStack`](https://github.com/Ridhaant/algostack)'s `sentiment_analyzer.py` and `news_dashboard.py`. In production, sentiment signals feed into the trading dashboard in real time alongside NSE equity, MCX commodity, and Binance crypto price feeds.
-
-**Part of the AlgoStack open-source layer:**
-- **[nexus-price-bus](https://github.com/Ridhaant/nexus-price-bus)** — multi-source ZMQ market data bus
-- **[vectorsweep](https://github.com/Ridhaant/vectorsweep)** — GPU strategy parameter sweep
-- **sentitrade** — Indian market NLP sentiment pipeline (this library)
-
----
-
-## Author
-
-**[Ridhaant Ajoy Thackur](https://github.com/Ridhaant)**
-*Data Scientist · NLP / FinTech · LNMIIT Jaipur*
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/in/ridhaant-thackur-09947a1b0)
-[![GitHub](https://img.shields.io/badge/GitHub-@Ridhaant-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/Ridhaant)
-[![Email](https://img.shields.io/badge/Email-redantthakur%40gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:redantthakur@gmail.com)
-
----
-
-## License
-
-MIT © 2026 Ridhaant Ajoy Thackur
+</div>
