@@ -68,6 +68,16 @@ Standard VADER is calibrated for social media — Indian financial news uses dom
 
 ---
 
+## 📂 Files to Upload
+
+When publishing this standalone repository, upload these exact files from the AlgoStack codebase:
+- `sentiment_analyzer.py` — VADER engine, 130+ keyword boosters, 11-sector classifier
+- `news_dashboard.py` — RSS ingestion and SHA-256 deduplication
+- `requirements.txt` — (Must include `vaderSentiment`, `feedparser`, `pyzmq`)
+- This `README.md`
+
+---
+
 ## 🔗 Proven in Production
 
 Extracted from [AlgoStack](https://github.com/Ridhaant/AlgoStack)'s live NLP layer — processing real Indian market news in real-time across 16 concurrent processes.
